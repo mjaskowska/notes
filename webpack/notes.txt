@@ -1,2 +1,79 @@
 source: FreeCodeCamp.org video - full tutorial for Beginners 
 https://www.youtube.com/watch?v=MpGLUVbqoYQ&ab_channel=freeCodeCamp.org
+
+
+----------------------------------------------------
+## What does it do?
+
+- bundles code/assets together
+- manages dependencies
+
+-----------------------------------------------------
+## How to set up?
+
+init:
+set up package.json: npm init -y
+add to .gitignore: node-modules and dist
+in package.json:
+
+devDependencies: {
+webpack: latestVversion
+webpack-cli: latestVersion
+
+scripts: {"start": "webpack  --config webpack.config.js"}
+
+add script tag of the newly created ./dist/main.js (or different) to index.html script tags
+
+
+-----------------------------------------------------
+## create content and export/import it
+
+index.js should be the main file to start with for webpack
+
+import all the main components to enable the code to run
+call "run" function
+
+to start: npm start (declared command in package.json)
+
+
+-----------------------------------------------------
+## config webpack:
+
+set up config file
+
+
+create new file: webpack.config.js  ** it's here where you add all plugins
+
+const path = require("path");
+
+module.exports = {
+  mode: "development",  **that mode stops the minifiying exported code, change it for production
+  
+  entry: "./index.js", (or different main js file)
+  output: {
+  filename: "main.js" (the name of the file with "exported" code)
+  path: path.resolve(__dirname, "dist") **(path of main.js)
+  },
+}
+
+
+-----------------------------------------------------
+## Handling loaders and CSS/SASS
+
+loaders are packages that we install and they dictate how certain files should be pre-processed as they're loaded or imported
+different way of handling different type files
+
+style-loader, css-loader, sass-loader etc etc
+
+CSS LOADER
+
+to set up this loader 
+grab code from "webpack.config.js" section from webpack.js.org/loaders/css-loader
+paste it into config file
+
+plus run in terminal:  npm install --save-dev style-loader css-loader
+
+
+
+
+
