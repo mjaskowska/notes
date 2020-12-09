@@ -14,6 +14,7 @@ https://www.youtube.com/watch?v=MpGLUVbqoYQ&ab_channel=freeCodeCamp.org
 init:
 set up package.json: npm init -y
 add to .gitignore: node-modules and dist
+
 in package.json:
 
 devDependencies: {
@@ -51,9 +52,11 @@ module.exports = {
   
   entry: "./index.js", (or different main js file)
   output: {
-  filename: "main.js" (the name of the file with "exported" code)
+  filename: "main.[contentHash].js" (the name of the file with "exported" code)
   path: path.resolve(__dirname, "dist") **(path of main.js)
   },
+  module: css/sass-loaders go here,
+  
 }
 
 
@@ -65,13 +68,265 @@ different way of handling different type files
 
 style-loader, css-loader, sass-loader etc etc
 
-CSS LOADER
+--- CSS LOADER ---
 
 to set up this loader 
 grab code from "webpack.config.js" section from webpack.js.org/loaders/css-loader
-paste it into config file
+paste it into config file (use: ["style-loader", "css-loader"] in that order!
+and in index.js import css file "./styles.css"
+
+css-loader takes css and turns into javaScript code
+style-loader - take that javaScript code (css) and injects into the DOM
 
 plus run in terminal:  npm install --save-dev style-loader css-loader
+
+css is loaded into the project only through the loaders, we don't add link tags in .html file
+
+--- SASS loader ---
+
+
+grab code from "webpack.config.js" section from webpack.js.org/loaders/sass-loader
+paste it into config file (use: ["style-loader", "css-loader", "sass-loader"] in that order! (thr last one happens first)
+
+
+-------------------------------
+CACHE BUNDLER
+
+we add in config file
+main.[contentHash].js
+but now we need to dynamically link that js file with html file
+we need plugin for that 
+
+--- HTML webpack plugin ---
+
+in webpack config file:
+add require var HtmlWebpackPlugin copied from a website
+add 
+plugins: [new HtmlWebpackPlugin({
+  template: "./template.html"  ** this has to be a path (./src/template.html) or accordingly
+})], 
+to module.exports
+
+this adds new script tag to html file but it's not the same html file where we have our content (this file is created automatically)
+
+use templates to create plain html file that we will build all our content in
+
+create template.html file in your dist directory (where all the files are being exported and generated)
+copy all content from your regular html file (the initial one) into the newly created template.html with changes (remove all links to ex. bootstrap, bulma etc, js script tag, 
+
+
+--------------------
+if we want to have different functionality between development and production 
+we could have different config files for all of them
+
+
+most popular is to create 3 different: 1 for dev 1 for production 1 mixed
+
+
+create more files:
+(the webpack.config.js already exists)
+webpack.dev.js
+webpack.prod.js
+
+and copy from config file all the content
+modify
+
+in webpack.prod.js:
+change mode to "production"
+delete entry
+delete plugins
+delete module (css/scss loaders)
+keep mode and output
+
+in config file:
+delete mode
+delete output and keep it only in prod
+keep plugins
+keep loaders (css/sass etc)
+keep entry
+
+webpack.dev.js
+delete hashing part of file name in output
+delete plugins
+delete module (css/scss loaders)
+keep mode and output (no hash in file name)
+
+
+
+to connect them together so they see each other's configuration we need webpack merge plugin
+
+npm install --save-dev webpack-merge
+
+
+require files in each config (common, dev and production) file
+ex in dev:
+const common = require("./webpack.config.js");
+const merge = require("webpack-merge");
+
+now we can convert the content of the file into function call of merge:
+module.exports = merge(common, { all the previous content });
+** it says: merge whatever is in common file with the content that we currently pass in the function of this current file)
+
+update accordingly both dev and prod files
+update package.json:
+scripts: { "start": "webpack --config webpack.dev.js",
+            "build": "webpack --config webpack.prod.js" },
+
+
+
+
+-----------------------------------
+SET UP DEV SERVER
+
+when we're in development we don't have to building by npm start command
+
+
+in terminal:
+npm install --save-dev webpack-dev-server
+
+in package.json
+update scripts from webpack to webpack-dev-server
+scripts: { "start": "webpack-dev-server --config webpack.dev.js --open",
+          "build": "webpack --config webpack.prod.js"},
+
+
+now it automatically updates the changes in the code when we develop - like live server
+
+
+
+
+----------------------------------------------------
+to process images 
+
+keep all the assests for your project in one folder: src in their own directory src->assets
+
+
+--- HTML LOADER ---
+loads all the img files 
+
+npm install --save-dev html-loader
+
+in webpack common (config)
+add
+in module: rules: [ 
+{ sccs loader linked },
+{test: /\.html$/,   use: ["html-loader"] }
+
+to handle those assets we need
+file-loader plugin
+
+npm install --save-dev file-loader
+
+update congif file (common)
+in module: rules: {scss-loader}, {html-loader}, {test: /\.(svg|png|jpg|jpeg|gif)$/,
+use: {loader: "file-loader", options: {name: "[name].[hash].[ext]"}, outputPath: "imgs"}
+
+
+
+--CLEAN - WEBPACK ---
+
+after npm run build - there is a bunch of js files created each time we build
+this plugin cleans out our working directory from all unused .js files (previous verions of it) and keeps only the most current, updated
+
+npm install --save clean-webpack-plugin
+
+update webpack.prod.js (config prod) file
+add a new constant
+const CleanWebpackPlugin = require("clean-webpack-plugin")
+in module.exports = {
+...
+plugins: [new CleanWebpackPlugin()]
+}
+
+
+
+
+--------------------------------
+minifying css and html
+extracting html into its own file
+
+in production it's better to have own css file rather than waiting for JS injecting the styles
+influence on perfomance
+we don't need to do that in developer mode, only production.
+
+plugin mini-css-extract
+
+npm install --save-dev mini-css-extract-plugin
+
+include that in webpack.prod.js
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+in module.exports = {
+...
+plugins: [new MiniCssExtractPlugin({filename: "[name].[contentHash].css"}), 
+otherPlugins()]
+}
+
+now we can delete scss loader from common config file and paste it into dev config file only
+
+and in production config file:
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+copy the same part of code and change style-loader to [MiniCssExtractPlugin.loader, **(other loaders)** "css-loader", "sass-loader"]
+
+
+
+------------------------
+after installing mini-css-extract 
+css files are very long 
+to minify the content we use Optimize CSS Assets Webpack Plugin
+
+npm install --save-dev optimize-css-assets-webpack-plugin
+
+it's better to include it in production only (in case in development we still need to update something, it's easier to read unminified code)
+so in production config file
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+
+module.exports ={ merge(common, {
+mode: "production",
+output: *** ,
+optimization: {
+minimizer: [new OptimizeCssAssetsPlugin()]}
+
+now if we npm run build - we have minified css code but we have overrode the js default minifier so we need to manually declare it back by:
+(in production config)
+const TerserPlugin = require("terser-webpack-plugin"); ** it's already installed by default, no need to reinstall it
+add it to minimizer part:
+minimizer: [new OptimizeCssAssetsPlugin(), new TerserPlugin()]}
+
+
+
+---------------------------
+we can also minify HTML file (the main template one)
+
+we have build-in plugin 
+
+in common config file cut the plugins section (no plugins needed in this part)
+in dev config file in paste the cut part - defaul version of HtmlWebpackPlugin (plus const on top of the file)
+and in production config file update and include some more options in optimization->minimizer section:
+minimizer: [new OptimizeCSSAssetsPlugin(), new TerserPlugin(), 
+            new HtmlWebpackPlugin({
+            template: "./src/template.html",  **path of the main html file that should be a template for webpack
+            minify: { removeAttributeQuotes: true, collapseWhitespace: true, removeComments: true}   })]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
