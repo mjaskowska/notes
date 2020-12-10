@@ -1,0 +1,55 @@
+Quick webpack setup
+
+1. Create files of the project - app.js & index.html
+2. terminal: npm init to create package.json
+3. terminal: webpack app.js bundle.js - links app.js (source file) with bundle.js (outcome, compiled file)
+4. add script tag in .html to link bundle.js
+5. create module files (ex. module1.js)
+6. in module1.js write code and export/import it to set up dependencies 
+7. to use watch mode type in terminal: webpack app.js bundle.js --watch (automatically initialize changes in the code)
+8. exporting procedure: 
+function functionName(){do something};
+module.exports = functionName();
+9. importing procedure:
+const function = require('./module1.js');
+10. add CSS file
+11. install CSS loader (npm install css-loader style-loader --save-dev)
+12. link CSS file to JS file; 
+in app.js: 
+require('!style-loader!css-loader!./styles.css');
+now CSS is going to be linked through JavaScript, not by link tag in HTML
+13. create webpack.config.js file
+module.exports ={ 
+entry: './app.js',
+output: {path: __dirname, filename: 'bundle.js'},
+module: {loaders: [{test: /\.css$/, 
+                    loader: 'style-loader!css-loader'}]}
+}
+this setup shortens the code to use in terminal to run the code - just 'webpack' is enough
+14. organise files in directory and update all the files with correct filepaths/requires
+index.html
+package.json
+webpack.config.js
+>node_modules
+>src 
+  >CSS
+    styles.css
+  >js
+    app.js
+    module1.js
+>dist
+  bundle.js
+  
+  15.live-server installation (npm install -g webpack-dev-server --save-dev)
+  16. update package.json 
+  "scripts": {
+  "start": "webpack-dev-server --entry .src/js/app.js --output -filename ./dist/bundle.js",
+  "build": "webpack"
+  }
+  
+  now for command "npm start" we fire live-server in development mode
+  
+  
+  
+  
+  
