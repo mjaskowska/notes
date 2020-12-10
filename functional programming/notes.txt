@@ -1,1 +1,61 @@
+const langs = ['JavaScript', 'Ruby', 'Haskell'];
+const [js, ...rest] = langs;
+
+js === 'JavaScript';
+rest[0] === 'Ruby';
+rest[1] === 'Haskell';
+
+========================================================================
+object.freeze protects the object from being modified
+
+const hobbies = Object.freeze(['programming', 'reading', 'music']);
+const firstTwo = hobbies.splice(0,2);  //TypeError
+consr firstTwo = hobbies.slice(0,2); //works, creates a new array out of first two elements
+
+
+========================================================================
+
+first class functions
+-----------------------
+
+const multiply = (x, y) => x*y;
+
+function delaration: 
+function add(x,y) { 
+return x+y;
+}
+
+const addAloast = add;
+
+
+passing functions as variables:
+const evens = [1,2,3].map(n=> n*2);
+
+------------------------
+Closures
+allows to encapsulate certain state
+
+const createAdder = x => {
+return (y) => x+y;
+};
+const add3 = createAdder(3);
+add3(2)===5
+add3(3)===6
+
+--------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
